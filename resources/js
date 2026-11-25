@@ -1,0 +1,46 @@
+const header = document.querySelector('[data-site-header]');
+const navToggle = document.querySelector('[data-nav-toggle]');
+const mainNav = document.querySelector('[data-main-nav]');
+
+const updateHeader = () => {
+    header?.classList.toggle('scrolled', window.scrollY > 24);
+};
+
+updateHeader();
+window.addEventListener('scroll', updateHeader, { passive: true });
+
+navToggle?.addEventListener('click', () => {
+    const isOpen = mainNav?.classList.toggle('open') ?? false;
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+});
+
+mainNav?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+        mainNav.classList.remove('open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+    });
+});
+
+const startDate = document.querySelector('[data-rent-start]');
+const endDate = document.querySelector('[data-rent-end]');
+const estimate = document.querySelector('[data-rent-estimate]');
+
+const updateEstimate = () => {
+    if (!startDate?.value || !endDate?.value || !estimate) return;
+
+    const start = new Date(`${startDate.value}T00:00:00`);
+    const end = new Date(`${endDate.value}T00:00:00`);
+    const days = Math.max(1, Math.round((end - start) / 86400000) + 1);
+    const quantity = Number(document.querySelector('[name="jumlah"]')?.value ?? 1);
+    const total = Number(estimate.dataset.price) * days * quantity;
+
+    estimate.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(total)}`;
+};
+
+startDate?.addEventListener('change', () => {
+    if (endDate && endDate.value < startDate.value) endDate.value = startDate.value;
+    if (endDate) endDate.min = startDate.value;
+    updateEstimate();
+});
+endDate?.addEventListener('change', updateEstimate);
+document.querySelector('[name="jumlah"]')?.addEventListener('change', updateEstimate);
